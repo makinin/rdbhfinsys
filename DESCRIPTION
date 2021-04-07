@@ -1,0 +1,14 @@
+Package: rdbhfinsys
+Title: provide tables with indicators for budget frame from chapter 4. in “Blåtthefte”
+Version: 1.1
+Authors@R: 
+    person(given = "Marija",
+           family = "Ninic",
+           role = c("aut", "cre"),
+           email = "marija.ninic@nsd.no",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: All usage and calculation results are the users responsibility. NSD is not responsible for any result calculated by users outside NSD. There is function for export tables to excel.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.0
