@@ -1,5 +1,5 @@
 Package: rdbhfinsys
-Title: provide tables with indicators for budget frame from chapter 4. in “Blåtthefte”
+Title: Provide tables with indicators for budget frame from chapter 4. in “Blåtthefte”
 Version: 1.1
 Authors@R: 
     person(given = "Marija",
@@ -11,7 +11,21 @@ Description: All usage and calculation results are the users responsibility. NSD
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Imports: 
-    tibble
+    dplyr,
+    magrittr,
+    purrr,
+    rdbhapi,
+    readr,
+    stats,
+    stringr,
+    tibble,
+    tidyr
 Depends: R (>= 2.10)
+Remotes: github::makinin/rdbhapi
+Language: nor
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr
