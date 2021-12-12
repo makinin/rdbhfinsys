@@ -4,10 +4,10 @@
 \alias{finsys_produksjonstabeller}
 \title{Lager tabeller med produksjonsdata, tilsvarende dem i Blått hefte}
 \usage{
-finsys_produksjonstabeller(arstall)
+finsys_produksjonstabeller(df)
 }
 \arguments{
-\item{arstall}{velg årstall}
+\item{df}{velg tibble gjerne output fra finsys_dbh_tidy}
 }
 \value{
 a tibble
