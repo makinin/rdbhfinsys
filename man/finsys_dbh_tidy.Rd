@@ -2,7 +2,7 @@
 % Please edit documentation in R/tidy_data.R
 \name{finsys_dbh_tidy}
 \alias{finsys_dbh_tidy}
-\title{Finsieringsystemet indikator og indikatorendring verdier}
+\title{Legger til endringstall fra året før}
 \usage{
 finsys_dbh_tidy(arstall)
 }
@@ -13,6 +13,5 @@ finsys_dbh_tidy(arstall)
 a tibble
 }
 \description{
-Legger til endringstall fra året før
+lager indikatorendring verdier
 }
-\keyword{internal}
