@@ -150,48 +150,7 @@ finsys_dbh_tidy <- function(arstall){
                     .data$indikator,
                     .data$kategori,
                     .data$kandidatgruppe,
-                    .data$faktor)  %>%
-
-    dplyr::summarise(dplyr::across("indikatorverdi", sum, na.rm = TRUE),
-                     .groups = "drop") %>%
-
-    # Legger til endringstall fra året før
-
-
-    tidyr::complete(budsjettar = tidyr::full_seq(.data$budsjettar, 1),
-                    .data$institusjonskode,
-                    tidyr::nesting(.data$indikator,
-                                   .data$kategori,
-                                   .data$kandidatgruppe,
-                                   .data$faktor),
-                    fill = list(indikatorverdi = 0)) %>%
-
-    # Legger til endringstall fra året før
-    dplyr::group_by(
-      .data$institusjonskode,
-      .data$indikator,
-      .data$kategori,
-      .data$kandidatgruppe,
-      .data$faktor) %>%
-    dplyr::arrange(.data$budsjettar) %>%
-    dplyr::mutate(indikatorendring = .data$indikatorverdi -
-                    dplyr::lag(.data$indikatorverdi))
-
-  finsys$institusjoner <- finsys$institusjoner %>%
-
-    dplyr::semi_join(finsys_data, by = "institusjonskode") %>%
-    dplyr::left_join(dplyr::select(finsys$institusjoner,
-    .data$institusjonskode, kortnavn_nyeste = .data$kortnavn),
-    by = c("institusjonskode_nyeste" = "institusjonskode"))
-
-  finsys_data <- finsys_data %>%
-    dplyr::left_join(dplyr::select(finsys$institusjoner,
-    .data$institusjonskode,
-    .data$institusjonskode_nyeste,
-    .data$institusjonsnavn_nyeste,
-    .data$kortnavn_nyeste),
-  by = "institusjonskode") %>%
-  dplyr::filter(.data$budsjettar == arstall  + 2)
+                    .data$faktor)
 
   finsys_data
 
