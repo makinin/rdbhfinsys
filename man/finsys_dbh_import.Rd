@@ -4,7 +4,7 @@
 \alias{finsys_dbh_import}
 \title{Laster ned alle finsystabellene}
 \usage{
-finsys_dbh_import(arstall, institusjoner = .finsys_dbh_institusjoner())
+finsys_dbh_import(arstall, institusjoner = .finsys_dbh_inst())
 }
 \arguments{
 \item{arstall}{velg årstall}

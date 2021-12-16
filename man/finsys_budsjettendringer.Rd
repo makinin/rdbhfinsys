@@ -4,15 +4,13 @@
 \alias{finsys_budsjettendringer}
 \title{Lager budsjettendring tabell}
 \usage{
-finsys_budsjettendringer(df, .data)
+finsys_budsjettendringer(df)
 }
 \arguments{
 \item{df}{data set fra finsys_dbh_tidy}
-
-\item{.data}{a tibble}
 }
 \value{
-
+a tibble
 }
 \description{
 budsjettendring tabeller fra api data

@@ -2,21 +2,17 @@
 % Please edit documentation in R/tidy_data.R
 \name{finsys_dbh_tidy}
 \alias{finsys_dbh_tidy}
-\title{Lager samletabell og beregner endringer og uttelling}
+\title{Finsieringsystemet indikator og indikatorendring verdier}
 \usage{
-finsys_dbh_tidy(arstall, .data)
+finsys_dbh_tidy(arstall)
 }
 \arguments{
-\item{arstall}{velg årstall}
-
-\item{.data}{a tibble}
+\item{arstall}{a tibble}
 }
 \value{
 a tibble
 }
 \description{
-Bruker import data fra DBH-API og hjelper funksjoner
-for å lage en samletabell med kategori, kandidatgruppe, faktor,
-idikatorverdi, indikatorendring, budsjettendring som skal brukes
-videre for å lage produksjonstableller
+Legger til endringstall fra året før
 }
+\keyword{internal}

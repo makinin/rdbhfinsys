@@ -4,10 +4,7 @@
 \alias{.finsys_dbh_prisjustering}
 \title{Prisjustering}
 \usage{
-.finsys_dbh_prisjustering(.data)
-}
-\arguments{
-\item{.data}{a tibble}
+.finsys_dbh_prisjustering()
 }
 \value{
 a tibble

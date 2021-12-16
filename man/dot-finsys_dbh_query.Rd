@@ -4,7 +4,7 @@
 \alias{.finsys_dbh_query}
 \title{DBH-tabeller med API-valg}
 \usage{
-.finsys_dbh_query(arstall, institusjoner = .finsys_dbh_institusjoner())
+.finsys_dbh_query(arstall, institusjoner = .finsys_dbh_inst())
 }
 \arguments{
 \item{arstall}{velg årstall}
