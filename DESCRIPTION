@@ -18,6 +18,7 @@ Imports:
     purrr,
     rdbhapi,
     readr,
+    rlang,
     stats,
     stringr,
     tibble,
