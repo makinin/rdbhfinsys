@@ -15,26 +15,23 @@
 #'
 
 lag_produksjonstabell <- function(df,
-                                  filter_indikatorer,
-                                  kolonne_vars,
-                                  funs
-) {
+filter_indikatorer, kolonne_vars, funs){
    if (is.null(funs)) {
-      funs <- identity
+funs <- identity
    }
    df %>%
-      dplyr::filter(.data$indikator %in% filter_indikatorer) %>%
-      tidyr::unite("kolonne_vars_samlet", kolonne_vars) %>%
-      dplyr::group_by(across(c("institusjonskode_nyeste",
-                    "institusjonsnavn_nyeste",
-                    "kortnavn_nyeste",
-                    "kolonne_vars_samlet",
-                    "budsjettar"))) %>%
-      dplyr::summarise(dplyr::across(c("indikatorverdi", "indikatorendring"), sum)) %>%
-      dplyr::ungroup() %>%
-      tidyr::pivot_wider(names_from =
-      "kolonne_vars_samlet", values_from  = c("indikatorverdi", "indikatorendring") ) %>%
-      dplyr::mutate(dplyr::across(-dplyr::matches("institusjon|navn|arstall"), funs))
+   dplyr::filter(.data$indikator %in% filter_indikatorer) %>%
+   tidyr::unite("kolonne_vars_samlet", kolonne_vars) %>%
+   dplyr::group_by(across(c("institusjonskode_nyeste",
+   "institusjonsnavn_nyeste",
+   "kortnavn_nyeste",
+   "kolonne_vars_samlet",
+   "budsjettar"))) %>%
+   dplyr::summarise(dplyr::across(c("indikatorverdi", "indikatorendring"), sum)) %>%
+   dplyr::ungroup() %>%
+   tidyr::pivot_wider(names_from =
+   "kolonne_vars_samlet", values_from  = c("indikatorverdi", "indikatorendring") ) %>%
+   dplyr::mutate(dplyr::across(-dplyr::matches("institusjon|navn|arstall"), funs))
 }
 
 
@@ -48,37 +45,34 @@ lag_produksjonstabell <- function(df,
 finsys_produksjonstabeller <- function(df){
 
    tribble(~filter_indikatorer, ~kolonne_vars, ~funs,
-           "studiepoeng", "kategori", NULL,
-           "kandidater", c("kategori", "faktor"), NULL,
-           c("doktorgrader", "utveksling"), c("indikator", "faktor", "kategori"), NULL,
-           c("publisering", "EU", "NFR", "BOA"), c("indikator") ,
-           list(pst = function(x) 100 * x / sum(x, na.rm = TRUE))) %>%
+   "studiepoeng", "kategori", NULL,
+   "kandidater", c("kategori", "faktor"), NULL,
+   c("doktorgrader", "utveksling"), c("indikator", "faktor", "kategori"), NULL,
+   c("publisering", "EU", "NFR", "BOA"), c("indikator") ,
+   list(pst = function(x) 100 * x / sum(x, na.rm = TRUE))) %>%
 
 
    pmap(function(...) {
       df %>%
-
-
-         lag_produksjonstabell(...)
+  lag_produksjonstabell(...)
    })
 }
 
 
 #' Lager budsjettendring tabell
 #' @description budsjettendring tabeller fra api data
-#'
 #' @param df data set fra finsys_dbh_tidy
-#' @param .data a tibble
-#' @return
+#' @return a tibble
 #' @export
-#'
 #' @importFrom dplyr if_else
 #' @importFrom dplyr matches
-finsys_budsjettendringer <- function(df, .data) {
+
+finsys_budsjettendringer <- function(df){
    unntak <- .finsys_dbh_unntak()
    indikatorsatser <- .finsys_dbh_indikatorsatser()
    tilskuddsgrad <- .finsys_dbh_tilskuddsgrad()
    prisjustering <- .finsys_dbh_prisjustering()
+   uttelling_historisk <- uttelling_historisk
    df %>%
    dplyr::anti_join(unntak,
    by = c("institusjonskode",  "indikator")) %>%
@@ -126,10 +120,12 @@ finsys_budsjettendringer <- function(df, .data) {
                       .data$institusjonsnavn_nyeste,
                       .data$kortnavn_nyeste,
                       .data$indikator) %>%
-      dplyr::summarise(budsjettendring_urund = sum(.data$budsjettendring)) %>%
+      dplyr::summarise(budsjettendring_urund =
+      sum(.data$budsjettendring)) %>%
 
-      dplyr::mutate(budsjettendring = .round_afz(.data$budsjettendring_urund, -3)) %>%
-      dplyr::mutate(budsjettendring = budsjettendring / 1000)
+      dplyr::mutate(budsjettendring =
+      .round_afz(.data$budsjettendring_urund, -3)) %>%
+      dplyr::mutate(budsjettendring = .data$budsjettendring / 1000)
 
 }
 
