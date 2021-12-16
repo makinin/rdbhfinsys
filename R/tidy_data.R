@@ -186,10 +186,10 @@ finsys_dbh_tidy <- function(arstall){
   finsys_data <- finsys$merge %>%
   tidyr::complete(budsjettar = tidyr::full_seq(.data$budsjettar, 1),
   .data$institusjonskode,
-  tidyr::nesting(.data$indikator,
-  .data$kategori,
-  .data$kandidatgruppe,
-  .data$faktor),
+  tidyr::nesting(indikator,
+  kategori,
+  kandidatgruppe,
+  faktor),
   fill = list(indikatorverdi = 0)) %>%
 
     # Legger til endringstall fra året før
