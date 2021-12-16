@@ -6,7 +6,6 @@ globalVariables(c("."))
 #' @param arstall a tibble
 #'
 #' @return a tibble
-#'
 #' @importFrom dplyr mutate
 #' @importFrom dplyr case_when
 #' @importFrom dplyr across
@@ -115,8 +114,8 @@ globalVariables(c("."))
 
 }
 
-#' Finsieringsystemet indikator og indikatorendring verdier
-#' @description Legger til endringstall fra året før
+#' Finsieringsystemet indikator verdier
+#' @description lager indikator verdier
 #' @param arstall a tibble
 #'
 #' @return a tibble
@@ -136,10 +135,12 @@ globalVariables(c("."))
 #' @export
 #'
 
-finsys_dbh_tidy <- function(arstall){
-  arstall <- arstall
-  finsys<- .finsys_dbh_data(arstall = arstall)
-  finsys_data <- finsys[c("studiepoeng", "kandidater", "utveksling", "doktorgrader",
+.finsys_dbh_merge <- function(arstall){
+
+  finsys <- .finsys_dbh_data(arstall = arstall)
+  finsys_data <- finsys
+  finsys_data$merge <- finsys[c("studiepoeng",
+  "kandidater", "utveksling", "doktorgrader",
   "publisering", "EU", "NFR", "BOA")] %>%
 
     dplyr::bind_rows(.id = "indikator") %>%
@@ -154,19 +155,42 @@ finsys_dbh_tidy <- function(arstall){
                     .data$faktor) %>%
 
     dplyr::summarise(dplyr::across("indikatorverdi", sum, na.rm = TRUE),
-                     .groups = "drop") %>%
-    dplyr::ungroup() %>%
+                     .groups = "drop")
 
     # Legger til endringstall fra året før
+  finsys_data$institusjoner <- finsys$institusjoner %>%
 
+    dplyr::semi_join(finsys_data$merge, by = "institusjonskode") %>%
+    dplyr::left_join(dplyr::select(finsys$institusjoner,
+    .data$institusjonskode, kortnavn_nyeste = .data$kortnavn),
+    by = c("institusjonskode_nyeste" = "institusjonskode"))
+c(finsys_data)
+}
 
-    tidyr::complete(budsjettar = tidyr::full_seq(.data$budsjettar, 1),
-                    .data$institusjonskode,
-                    tidyr::nesting(.data$indikator,
-                                   .data$kategori,
-                                   .data$kandidatgruppe,
-                                   .data$faktor),
-                    fill = list(indikatorverdi = 0)) %>%
+#' Legger til endringstall fra året før
+#' @description lager indikatorendring verdier
+#' @param arstall a tibble
+#'
+#' @return a tibble
+#' @importFrom tidyr complete
+#' @importFrom tidyr full_seq
+#' @importFrom tidyr nesting
+#' @importFrom dplyr arrange
+#' @importFrom dplyr lag
+#' @importFrom dplyr semi_join
+#' @importFrom dplyr left_join
+#' @export
+finsys_dbh_tidy <- function(arstall){
+  arstall <- arstall
+  finsys <- .finsys_dbh_merge(arstall = arstall)
+  finsys_data <- finsys$merge %>%
+  tidyr::complete(budsjettar = tidyr::full_seq(.data$budsjettar, 1),
+  .data$institusjonskode,
+  tidyr::nesting(.data$indikator,
+  .data$kategori,
+  .data$kandidatgruppe,
+  .data$faktor),
+  fill = list(indikatorverdi = 0)) %>%
 
     # Legger til endringstall fra året før
     dplyr::group_by(
@@ -177,11 +201,19 @@ finsys_dbh_tidy <- function(arstall){
       .data$faktor) %>%
     dplyr::arrange(.data$budsjettar) %>%
     dplyr::mutate(indikatorendring = .data$indikatorverdi -
-                    dplyr::lag(.data$indikatorverdi))
-
+  dplyr::lag(.data$indikatorverdi))
+  finsys_data <- finsys_data %>%
+    dplyr::left_join(dplyr::select(finsys$institusjoner,
+    .data$institusjonskode,
+    .data$institusjonskode_nyeste,
+    .data$institusjonsnavn_nyeste,
+    .data$kortnavn_nyeste),
+    by = "institusjonskode") %>%
+    dplyr::filter(.data$budsjettar == arstall  + 2)
   finsys_data
 
 }
+
 
 #' Beregner budsjettendringstall per indikator
 #' @description Bruker alternativ avrundringsfunskjon,
