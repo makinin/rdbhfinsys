@@ -131,6 +131,7 @@ globalVariables(c("."))
 #' @importFrom dplyr lag
 #' @importFrom dplyr semi_join
 #' @importFrom dplyr left_join
+#' @importFrom dplyr ungroup
 #' @keywords internal
 #' @export
 #'
@@ -154,6 +155,7 @@ finsys_dbh_tidy <- function(arstall){
 
     dplyr::summarise(dplyr::across("indikatorverdi", sum, na.rm = TRUE),
                      .groups = "drop") %>%
+    dplyr::ungroup() %>%
 
     # Legger til endringstall fra året før
 
