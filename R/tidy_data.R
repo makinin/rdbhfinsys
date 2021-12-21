@@ -76,8 +76,8 @@ globalVariables(c("."))
     ~ "ordinar")) %>%
     tidyr::drop_na(.data$kategori)
 #doktorgrader data
-  finsys$doktorgrader <- list(ordinar = finsys_dbh$doktorgrader,
-    samarbeids_phd = finsys_dbh$doktorgrader_samarbeid,
+  finsys$doktorgrader <-   list(ordinar = finsys_dbh$doktorgrader,
+   `samarbeids-ph.d.` = finsys_dbh$doktorgrader_samarbeid,
     PKU = finsys_dbh$PKU) %>%
     purrr::map_dfr(~stats::setNames(., stringr::str_replace_all(names(.),
     c("antall($| totalt)" = "indikatorverdi",
@@ -85,6 +85,7 @@ globalVariables(c("."))
                    .id = "kandidatgruppe") %>%
     dplyr::mutate(faktor = dplyr::case_when(kandidatgruppe ==
     "samarbeids-ph.d." ~ 0.2))
+
   finsys$publisering <- finsys_dbh$publisering %>%
     dplyr::rename(indikatorverdi = .data$publiseringspoeng)
 
@@ -186,10 +187,10 @@ finsys_dbh_tidy <- function(arstall){
   finsys_data <- finsys$merge %>%
   tidyr::complete(budsjettar = tidyr::full_seq(.data$budsjettar, 1),
   .data$institusjonskode,
-  tidyr::nesting(indikator,
-  kategori,
-  kandidatgruppe,
-  faktor),
+  tidyr::nesting(.data$indikator,
+  .data$kategori,
+  .data$kandidatgruppe,
+  .data$faktor),
   fill = list(indikatorverdi = 0)) %>%
 
     # Legger til endringstall fra året før
