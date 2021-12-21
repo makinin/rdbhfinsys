@@ -72,7 +72,7 @@ finsys_budsjettendringer <- function(df){
    indikatorsatser <- .finsys_dbh_indikatorsatser()
    tilskuddsgrad <- .finsys_dbh_tilskuddsgrad()
    prisjustering <- .finsys_dbh_prisjustering()
-   uttelling_historisk <- uttelling_historisk
+
    df %>%
    dplyr::anti_join(unntak,
    by = c("institusjonskode",  "indikator")) %>%
