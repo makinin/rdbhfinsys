@@ -201,7 +201,7 @@ finsys_dbh_tidy <- function(arstall){
       .data$kandidatgruppe,
       .data$faktor) %>%
     dplyr::arrange(.data$budsjettar) %>%
-    dplyr::mutate(indikatorendring = .data$indikatorverdi -
+    dplyr::mutate(indikatorendring = indikatorverdi -
   dplyr::lag(indikatorverdi))
   finsys_data <- finsys_data %>%
     dplyr::left_join(dplyr::select(finsys$institusjoner,
