@@ -1,4 +1,4 @@
-globalVariables(c("."))
+globalVariables(c(".", "uttelling_historisk"))
 #' Finsieringsystemet data
 #' @description Filtrerer finsystabeller
 #' til hva som gir uttelling, og harmoniserer
