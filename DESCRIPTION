@@ -10,7 +10,7 @@ Authors@R:
 Description: All usage and calculation results are the users responsibility. NSD is not responsible for any result calculated by users outside NSD. There is function for export tables to excel.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+LazyData: TRUE
 RoxygenNote: 7.1.1
 Imports: 
     dplyr,
