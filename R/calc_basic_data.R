@@ -90,7 +90,7 @@ finsys_budsjettendringer <- function(df){
 
       # Legger til historisk uttelling for indikatorer med lukket ramme
       dplyr::left_join(dplyr::left_join
-      (dplyr::filter(uttelling_historisk,
+      (dplyr::filter(rdbhfinsys:::uttelling_historisk,
       .data$indikator %in% c("publisering", "BOA", "EU", "NFR")),
       prisjustering, by = "budsjettar") %>%
       dplyr::mutate(uttelling_prisjustert =
