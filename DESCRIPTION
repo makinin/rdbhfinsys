@@ -5,12 +5,11 @@ Authors@R:
     person(given = "Marija",
            family = "Ninic",
            role = c("aut", "cre"),
-           email = "marija.ninic@nsd.no",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           email = "marija.ninic@hkdir.no",
+           comment = c(ORCID = "0000-0001-8484-5817"))
 Description: All usage and calculation results are the users responsibility. NSD is not responsible for any result calculated by users outside NSD. There is function for export tables to excel.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: TRUE
 RoxygenNote: 7.1.1
 Imports: 
     dplyr,
