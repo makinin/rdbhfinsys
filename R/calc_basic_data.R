@@ -88,22 +88,13 @@ finsys_budsjettendringer <- function(df){
       tidyr::replace_na(.data$faktor, 1) *
       tidyr::replace_na(.data$tilskuddsgrad, 1)) %>%
 
-      # Legger til historisk uttelling for indikatorer med lukket ramme
-      dplyr::left_join(dplyr::left_join
-      (dplyr::filter(rdbhfinsys:::uttelling_historisk,
-      .data$indikator %in% c("publisering", "BOA", "EU", "NFR")),
-      prisjustering, by = "budsjettar") %>%
-      dplyr::mutate(uttelling_prisjustert =
-      .data$uttelling / .data$arsdeflator) %>%
-      dplyr::select(.data$budsjettar,
-      .data$institusjonskode, .data$indikator, .data$uttelling_prisjustert),
-      by = c("budsjettar", "institusjonskode", "indikator")) %>%
+
 
       # Beregner satser og uttelling for indikatorer med lukket ramme
       dplyr::group_by(.data$budsjettar, .data$indikator) %>%
       dplyr::mutate(sats_rb =
       dplyr::case_when(is.na(.data$sats_rb) ~
-      .data$ramme / sum(.data$indikatorverdi),
+      .data$ramme / sum(.data$indikatorverdi)  ,
       TRUE ~ .data$sats_rb))%>%
       dplyr::group_by(.data$institusjonskode,
                       .data$indikator,
@@ -113,8 +104,7 @@ finsys_budsjettendringer <- function(df){
       dplyr::arrange(.data$budsjettar)%>%
       dplyr::mutate(budsjettendring =
       dplyr::coalesce(.data$budsjettendring,
-      (.data$indikatorverdi * .data$sats_rb) -
-      tidyr::replace_na(lag(.data$uttelling_prisjustert), 0))) %>%
+      (.data$indikatorverdi * .data$sats_rb)) )%>%
       dplyr::group_by(.data$budsjettar,
                       .data$institusjonskode_nyeste,
                       .data$institusjonsnavn_nyeste,
