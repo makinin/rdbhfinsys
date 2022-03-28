@@ -1,9 +1,9 @@
-globalVariables(c(".", "uttelling_historisk"))
+globalVariables(c("."))
 #' Finsieringsystemet data
 #' @description Filtrerer finsystabeller
 #' til hva som gir uttelling, og harmoniserer
 #' variabelnavn og -verdier til sammenslåing
-#' @param arstall a tibble
+#' @param top valgte årstall 
 #'
 #' @return a tibble
 #' @importFrom dplyr mutate
@@ -26,98 +26,99 @@ globalVariables(c(".", "uttelling_historisk"))
 #' @keywords internal
 #' @export
 #'
-.finsys_dbh_data <- function(arstall) {
-  finsys_dbh <- finsys_dbh_import(arstall  = arstall)
+.finsys_dbh_data <- function(top) {
+  finsys_dbh <- finsys_dbh_import(top  = top)
   finsys <- finsys_dbh
-# studiepoeng data
+  # studiepoeng data
   finsys$studiepoeng <- finsys_dbh$studiepoeng %>%
     dplyr::rename(indikatorverdi =
-    .data$`ny produksjon egentfin`) %>%
+                    .data$`ny produksjon egentfin`) %>%
     # Bruker finansieringskategorien basert på studentens
     #tilhørighet for BI og for emnet ellers
     dplyr::mutate(kategori =
-    dplyr::case_when(institusjonskode == "8241" ~
-    `finmodkode student`, TRUE ~
-    `finmodekode emne`)) %>%
+                    dplyr::case_when(institusjonskode == "8241" ~
+                                       `finmodkode student`, TRUE ~
+                                       `finmodekode emne`)) %>%
     dplyr::mutate(dplyr::across(c("studentkategori", "kategori"),
-    stringr::str_to_upper)) %>%
+                                stringr::str_to_upper)) %>%
     dplyr::filter(.data$kategori %in% LETTERS[1:6],
-    .data$studentkategori == "S")
-#kandidater data
+                  .data$studentkategori == "S")
+  #kandidater data
   finsys$kandidater <- finsys_dbh$kandidater %>%
-  dplyr::rename(faktor =
-  .data$`uttelling kode:1=enkel, 2=dobbel`,
-  etterrapportert = .data$etterrapp,
-  innpasset = .data$`dobbel til enkel`,
-  kategori = .data$`finansierings-kategori`) %>%
-  dplyr::mutate(dplyr::across("kategori", stringr::str_to_upper)) %>%
-  dplyr::mutate(dplyr::across("faktor",
-    readr::parse_integer)) %>%
-  dplyr::mutate(dplyr::across(c("etterrapportert", "innpasset"),
-  tidyr::replace_na, 0))  %>%
-  dplyr::mutate(ordinar =
-  .data$totalt - .data$etterrapportert - .data$innpasset) %>%
-  dplyr::select(- .data$totalt) %>%
-  tidyr::pivot_longer(c(.data$ordinar,
-   .data$etterrapportert, .data$innpasset),
-  names_to = "kandidatgruppe",
-  values_to = "indikatorverdi")
-#utveksling data
+    dplyr::rename(faktor =
+                    .data$`uttelling kode:1=enkel, 2=dobbel`,
+                  etterrapportert = .data$etterrapp,
+                  innpasset = .data$`dobbel til enkel`,
+                  kategori = .data$`finansierings-kategori`) %>%
+    dplyr::mutate(dplyr::across("kategori", stringr::str_to_upper)) %>%
+    dplyr::filter(.data$kategori %in% c("A", "B", "C", "D", "E", "F")) %>%
+    dplyr::mutate(dplyr::across("faktor",
+                                readr::parse_integer)) %>%
+    dplyr::mutate(dplyr::across(c("etterrapportert", "innpasset"),
+                                tidyr::replace_na, 0))  %>%
+    dplyr::mutate(ordinar =
+                    .data$totalt - .data$etterrapportert - .data$innpasset) %>%
+    dplyr::select(- .data$totalt) %>%
+    tidyr::pivot_longer(c(.data$ordinar,
+                          .data$etterrapportert, .data$innpasset),
+                        names_to = "kandidatgruppe",
+                        values_to = "indikatorverdi")
+  #utveksling data
   finsys$utveksling <- finsys_dbh$utveksling %>%
     dplyr::rename(indikatorverdi = .data$`antall totalt`) %>%
-
+    
     dplyr::mutate(dplyr::across(c("utvekslingsavtale", "type", "niv\u00e5kode"),
-    stringr::str_to_upper)) %>%
+                                stringr::str_to_upper)) %>%
     dplyr::filter("niv\u00e5kode" != "FU") %>%
     dplyr::mutate(kategori =
-    dplyr::case_when(utvekslingsavtale == "ERASMUS+" & type == "NORSK"
-     ~ "Erasmus+",
-    utvekslingsavtale != "INDIVID"
-    ~ "ordinar")) %>%
+                    dplyr::case_when(utvekslingsavtale == "ERASMUS+" & type == "NORSK"
+                                     ~ "Erasmus+",
+                                     utvekslingsavtale != "INDIVID"
+                                     ~ "ordinar")) %>%
     tidyr::drop_na(.data$kategori)
-#doktorgrader data
+  #doktorgrader data
   finsys$doktorgrader <-   list(ordinar = finsys_dbh$doktorgrader,
-   `samarbeids-ph.d.` = finsys_dbh$doktorgrader_samarbeid,
-    PKU = finsys_dbh$PKU) %>%
+                                `samarbeids-ph.d.` = finsys_dbh$doktorgrader_samarbeid,
+                                PKU = finsys_dbh$PKU) %>%
     purrr::map_dfr(~stats::setNames(., stringr::str_replace_all(names(.),
-    c("antall($| totalt)" = "indikatorverdi",
-    "institusjonskode.*" = "institusjonskode"))),
+                                                                c("antall($| totalt)" = "indikatorverdi",
+                                                                  "institusjonskode.*" = "institusjonskode"))),
                    .id = "kandidatgruppe") %>%
     dplyr::mutate(faktor = dplyr::case_when(kandidatgruppe ==
-    "samarbeids-ph.d." ~ 0.2))
-
+                                              "samarbeids-ph.d." ~ 0.2))
+  
   finsys$publisering <- finsys_dbh$publisering %>%
     dplyr::rename(indikatorverdi = .data$publiseringspoeng)
-
+  
   #økonomi data
   finsys$ekonomi <- finsys_dbh$ekonomi %>%
     dplyr::rename(EU = .data$eu) %>%
     dplyr::mutate(NFR =
-    purrr::map2_dbl(.data$nfr, .data$rff, sum, na.rm = TRUE),
-    BOA = purrr::map2_dbl(.data$bidragsinntekter,
-  .data$oppdragsinntekter, sum, na.rm = TRUE))
-
+                    purrr::map2_dbl(.data$nfr, .data$rff, sum, na.rm = TRUE),
+                  BOA = purrr::map2_dbl(.data$bidragsinntekter,
+                                        .data$oppdragsinntekter, sum, na.rm = TRUE))
+  
   finsys$institusjoner <- finsys_dbh$institusjoner %>%
-
+    
     dplyr::rename(institusjonskode_nyeste =
-    enc2utf8("institusjonskode (sammensl\u00e5tt)"),
-    institusjonsnavn_nyeste =
-    enc2utf8("sammensl\u00e5tt navn"))
-
+                    enc2utf8("institusjonskode (sammensl\u00e5tt)"),
+                  institusjonsnavn_nyeste = enc2utf8("sammensl\u00e5tt navn"))
+  
   finsys <-
     c("EU", "NFR", "BOA") %>%
     stats::setNames(., .) %>%
     purrr::map(~dplyr::select(finsys$ekonomi,
-       c("institusjonskode", "\u00e5rstall",
-         "indikatorverdi" = all_of(.)))) %>%
-
+                              c("institusjonskode", "\u00e5rstall",
+                                "indikatorverdi" = all_of(.)))) %>%
+    
     c(finsys)
-
+  
 }
+
 
 #' Finsieringsystemet indikator verdier
 #' @description lager indikator verdier
-#' @param arstall a tibble
+#' @param top valgte årstall 
 #'
 #' @return a tibble
 #'
@@ -136,42 +137,41 @@ globalVariables(c(".", "uttelling_historisk"))
 #' @export
 #'
 
-.finsys_dbh_merge <- function(arstall){
-
-  finsys <- .finsys_dbh_data(arstall = arstall)
+.finsys_dbh_merge <- function(top){
+  
+  finsys <- .finsys_dbh_data(top = top)
   finsys_data <- finsys
   finsys_data$merge <- finsys[c("studiepoeng",
-  "kandidater", "utveksling", "doktorgrader",
-  "publisering", "EU", "NFR", "BOA")] %>%
-
+                                "kandidater", "utveksling", "doktorgrader",
+                                "publisering", "EU", "NFR", "BOA")] %>%
+    
     dplyr::bind_rows(.id = "indikator") %>%
     dplyr::rename(arstall = "\u00e5rstall") %>%
-    dplyr::mutate(budsjettar = .data$arstall + 2) %>%
-
-    dplyr::group_by(.data$budsjettar,
+    
+    
+    dplyr::group_by(.data$arstall,
                     .data$institusjonskode,
                     .data$indikator,
                     .data$kategori,
                     .data$kandidatgruppe,
                     .data$faktor) %>%
-
+    
     dplyr::summarise(dplyr::across("indikatorverdi", sum, na.rm = TRUE),
                      .groups = "drop")
-
-    # Legger til endringstall fra året før
+  
+  # Legger til endringstall fra året før
   finsys_data$institusjoner <- finsys$institusjoner %>%
-
+    
     dplyr::semi_join(finsys_data$merge, by = "institusjonskode") %>%
     dplyr::left_join(dplyr::select(finsys$institusjoner,
-    .data$institusjonskode, kortnavn_nyeste = .data$kortnavn),
-    by = c("institusjonskode_nyeste" = "institusjonskode"))
-c(finsys_data)
+                                   .data$institusjonskode, kortnavn_nyeste = .data$kortnavn),
+                     by = c("institusjonskode_nyeste" = "institusjonskode"))
+  c(finsys_data)
 }
 
 #' Legger til endringstall fra året før
 #' @description lager indikatorendring verdier
-#' @param arstall a tibble
-#'
+#' @param top valgte årstall
 #' @return a tibble
 #' @importFrom tidyr complete
 #' @importFrom tidyr full_seq
@@ -181,18 +181,18 @@ c(finsys_data)
 #' @importFrom dplyr semi_join
 #' @importFrom dplyr left_join
 #' @export
-finsys_dbh_tidy <- function(arstall){
-  arstall <- arstall
-  finsys <- .finsys_dbh_merge(arstall = arstall)
+finsys_dbh_tidy <- function(top){
+  top <- top
+  finsys <- .finsys_dbh_merge(top = top)
   finsys_data <- finsys$merge %>%
-  tidyr::complete(budsjettar = tidyr::full_seq(.data$budsjettar, 1),
-  .data$institusjonskode,
-  tidyr::nesting(indikator,
-  kategori,
-  kandidatgruppe,
-  faktor),
-  fill = list(indikatorverdi = 0)) %>%
-
+    tidyr::complete(arstall = tidyr::full_seq(.data$arstall, 1),
+                    .data$institusjonskode,
+                    tidyr::nesting(indikator,
+                                   kategori,
+                                   kandidatgruppe,
+                                   faktor),
+                    fill = list(indikatorverdi = 0)) %>%
+    
     # Legger til endringstall fra året før
     dplyr::group_by(
       .data$institusjonskode,
@@ -200,48 +200,17 @@ finsys_dbh_tidy <- function(arstall){
       .data$kategori,
       .data$kandidatgruppe,
       .data$faktor) %>%
-    dplyr::arrange(.data$budsjettar) %>%
+    dplyr::arrange(.data$arstall) %>%
     dplyr::mutate(indikatorendring = indikatorverdi -
-  dplyr::lag(indikatorverdi))
+                    dplyr::lag(indikatorverdi))
   finsys_data <- finsys_data %>%
     dplyr::left_join(dplyr::select(finsys$institusjoner,
-    .data$institusjonskode,
-    .data$institusjonskode_nyeste,
-    .data$institusjonsnavn_nyeste,
-    .data$kortnavn_nyeste),
-    by = "institusjonskode") %>%
-    dplyr::filter(.data$budsjettar == arstall  + 2)
+                                   .data$institusjonskode,
+                                   .data$institusjonskode_nyeste,
+                                   .data$institusjonsnavn_nyeste,
+                                   .data$kortnavn_nyeste),
+                     by = "institusjonskode") 
   finsys_data
-
+  
 }
 
-
-#' Beregner budsjettendringstall per indikator
-#' @description Bruker alternativ avrundringsfunskjon,
-#' med ulik behandling av avrundingsfeil
-#' på 0.5n (afz = away from zero, 1.5 ≈ 2, -2.5 ≈ -3).
-#' Funksjonen base::round
-#' bruker såkalt "banker's rounding" hvor det rundes bort
-#' fra oddetall (1.5 ≈ 2, -2.5 ≈ -2).
-#'
-#' @param x value
-#' @param digits decimal places
-#' @keywords internal
-#'
-.round_afz <- function(x, digits = 0) {
-  scale <- 10^digits
-  return(sign(x) * trunc((abs(x) * scale) + 0.5) / scale)
-}
-
-#' Prisjustering
-#' @description Hjep funksjon for beregning av årsdeflator
-#' @return a tibble
-#' @importFrom dplyr lead
-#' @export
-#' @keywords internal
-
-.finsys_dbh_prisjustering <- function() {
-  .finsys_dbh_arsendring() %>%
-    dplyr::arrange(.data$budsjettar) %>%
-    dplyr::mutate(arsdeflator = 1 / (dplyr::lead(.data$arsendring_pst) / 100 + 1))
-}
